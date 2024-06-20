@@ -29,10 +29,10 @@ The CPU Scheduling Simulator project is designed to simulate and analyze the per
 ### Steps to Run
 1. **Compile the C++ Program:**
    - Ensure you have a C++ compiler installed (e.g., g++).
-   - Navigate to the directory containing `cpu_scheduling.cpp`.
+   - Navigate to the directory containing `acm.cpp`.
    - Compile the C++ program:
      ```bash
-     g++ -std=c++17 -o acm.exe cpu_scheduling.cpp
+     g++ -std=c++17 -o acm.exe acm.cpp
      ```
    - This will generate an executable `acm.exe`.
 
