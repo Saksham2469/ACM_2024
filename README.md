@@ -23,10 +23,10 @@ The CPU Scheduling Simulator project aims to simulate and analyze the performanc
 ### Steps to Run
 1. **Compile the C++ Program:**
    - Ensure you have a C++ compiler installed (e.g., g++).
-   - Navigate to the directory containing `cpu_scheduling.cpp`.
+   - Navigate to the directory containing `acm.cpp`.
    - Compile the C++ program:
      ```bash
-     g++ -std=c++17 -o acm.exe cpu_scheduling.cpp
+     g++ -std=c++17 -o acm.exe acm.cpp
      ```
    - This will generate an executable `acm.exe`.
 
@@ -96,5 +96,3 @@ The project includes robust error handling for user inputs:
 - Documentation for Python tkinter library and C++ programming.
 
 ---
-
-Feel free to expand each section with more detailed explanations, examples, or additional subsections to provide a comprehensive overview of your CPU Scheduling Simulator project.
