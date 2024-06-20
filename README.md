@@ -42,6 +42,7 @@ The CPU Scheduling Simulator project is designed to simulate and analyze the per
      python py
      ```
    - This will launch the GUI interface.
+   - Make sure that directory path of the cpp , compiled cpp and py files is the same.
 
 3. **Input Data:**
    - Enter the number of tasks and details (burst time, arrival time, priority) using the GUI.
