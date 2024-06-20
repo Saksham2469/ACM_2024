@@ -127,6 +127,8 @@ The GUI interface is developed using Python's tkinter library:
 - **Buttons:** Proceed to input data, run simulation.
 - **Output:** Display of results including average turnaround time and waiting time.
 
+---
+
 ## 6. Error Handling
 The project includes robust error handling for user inputs:
 - Validation checks for numerical inputs.
