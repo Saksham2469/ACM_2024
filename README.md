@@ -1,18 +1,18 @@
 # CPU Scheduling Simulator
 
 ## Table of Contents
-1. [Project Overview](#project-overview)
-2. [How to Run](#how-to-run)
-3. [Internal Working](#internal-working)
-4. [Algorithms Implemented](#algorithms-implemented)
-   - [FCFS (First Come First Serve)](#fcfs-first-come-first-serve)
-   - [SJF (Shortest Job First)](#sjf-shortest-job-first)
-   - [Round Robin](#round-robin)
-   - [Priority Scheduling](#priority-scheduling)
-5. [GUI Interface](#gui-interface)
-6. [Error Handling](#error-handling)
-7. [Learning Takeaways](#learning-takeaways)
-8. [Resources and References](#resources-and-references)
+1. [Project Overview](#1-project-overview)
+2. [How to Run](#2-how-to-run)
+3. [Internal Working](#3-internal-working)
+4. [Algorithms Implemented](#4-algorithms-implemented)
+   - [FCFS (First Come First Serve)](#41-fcfs-first-come-first-serve)
+   - [SJF (Shortest Job First)](#42-sjf-shortest-job-first)
+   - [Round Robin](#43-round-robin)
+   - [Priority Scheduling](#44-priority-scheduling)
+5. [GUI Interface](#5-gui-interface)
+6. [Error Handling](#6-error-handling)
+7. [Learning Takeaways](#7-learning-takeaways)
+8. [Resources and References](#8-resources-and-references)
 
 ---
 
@@ -63,7 +63,7 @@ The Python interface (tkinter-based GUI) facilitates user input and displays sim
 
 ## 4. Algorithms Implemented
 
-### FCFS (First Come First Serve)
+### 4.1 FCFS (First Come First Serve)
 #### Description
 FCFS is the simplest scheduling algorithm, where processes are executed in the order they arrive in the ready queue.
 
@@ -77,7 +77,7 @@ FCFS is the simplest scheduling algorithm, where processes are executed in the o
 - **Burst Times:** T1(5), T2(3), T3(4)
 - **Execution Order:** T1, T2, T3
 
-### SJF (Shortest Job First)
+### 4.2 SJF (Shortest Job First)
 #### Description
 SJF executes the shortest burst time task first to minimize average waiting time.
 
@@ -90,7 +90,7 @@ SJF executes the shortest burst time task first to minimize average waiting time
 - **Burst Times:** T1(3), T2(2), T3(4)
 - **Execution Order:** T2, T1, T3
 
-### Round Robin
+### 4.3 Round Robin
 #### Description
 Round Robin allocates CPU time to each task for a fixed time quantum, cycling through tasks in a circular queue.
 
@@ -104,7 +104,7 @@ Round Robin allocates CPU time to each task for a fixed time quantum, cycling th
 - **Time Quantum:** 2 units
 - **Execution Order:** T1, T2, T3, T1, T3, T1, ...
 
-### Priority Scheduling
+### 4.4 Priority Scheduling
 #### Description
 Priority Scheduling executes tasks based on their priority, with higher priority tasks preempting lower priority ones (in preemptive mode).
 
@@ -148,6 +148,4 @@ The project includes robust error handling for user inputs:
 - Operating System Concepts by Abraham Silberschatz, Peter B. Galvin, Greg Gagne.
 - Online resources and tutorials on CPU scheduling algorithms.
 - Documentation for Python tkinter library and C++ programming.
-
----
 
