@@ -133,16 +133,12 @@ void rr(const vector<Task> &tasks, double quantum, vector<double> &summary)
             Task task = q.front();
             q.pop();
 
+            // Determine the time slice (quantum) for the current task
             double timeSlice = min(task.remainingTime, quantum);
-            task.remainingTime -= timeSlice;
             currentTime += timeSlice;
+            task.remainingTime -= timeSlice;
 
-            while (i < rrTasks.size() && rrTasks[i].arrivalTime <= currentTime)
-            {
-                q.push(rrTasks[i]);
-                i++;
-            }
-
+            // If task is not completed, requeue it
             if (task.remainingTime > 0)
             {
                 q.push(task);
@@ -240,16 +236,15 @@ void priorityPreemptive(const vector<Task> &tasks, vector<double> &summary)
         {
             Task task = pq.top();
             pq.pop();
-            double timeSlice = min(task.remainingTime, 1.0);
+
+            // Calculate time slice dynamically based on the next arrival time or remaining time
+            double nextEventTime = (i < priorityTasks.size()) ? priorityTasks[i].arrivalTime : numeric_limits<double>::infinity();
+            double timeSlice = min(task.remainingTime, nextEventTime - currentTime);
+
             task.remainingTime -= timeSlice;
             currentTime += timeSlice;
 
-            while (i < priorityTasks.size() && priorityTasks[i].arrivalTime <= currentTime)
-            {
-                pq.push(priorityTasks[i]);
-                i++;
-            }
-
+            // Re-push the task if it's not completed
             if (task.remainingTime > 0)
             {
                 pq.push(task);
