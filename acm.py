@@ -121,13 +121,21 @@ def display_output(output_lines):
             entry.grid(row=i, column=j, padx=10, pady=2, sticky="nsew")
             entry.insert(tk.END, value.strip())
 
-    summary_label = tk.Label(result_text_frame, text="Summary Table (Avg Turnaround Time and Avg Waiting Time)", font=("Helvetica", 12, "bold"))
-    summary_label.grid(row=len(output_lines) + 1, column=0, columnspan=len(headers), pady=10)
+    # summary_label = tk.Label(result_text_frame, text="Summary Table (Avg Turnaround Time and Avg Waiting Time)", font=("Helvetica", 12, "bold"))
+    # summary_label.grid(row=len(output_lines) + 1, column=0, columnspan=len(headers), pady=10)
 
-    summary_data = output_lines[-2].strip()
-    summary_entry = tk.Entry(result_text_frame, width=70, font=("Helvetica", 10))
-    summary_entry.grid(row=len(output_lines) + 2, column=0, columnspan=len(headers), padx=10, pady=5)
-    summary_entry.insert(tk.END, summary_data)
+    # summary_data = output_lines[-2].strip()
+    # summary_entry = tk.Entry(result_text_frame, width=70, font=("Helvetica", 10))
+    # summary_entry.grid(row=len(output_lines) + 2, column=0, columnspan=len(headers), padx=10, pady=5)
+    # summary_entry.insert(tk.END, summary_data)
+
+    for i, line in enumerate(output_lines[1:], start=1):
+        data = line.split('|')
+        for j, value in enumerate(data):
+            entry = tk.Entry(result_text_frame, width=15, font=("Helvetica", 10))
+            entry.grid(row=i, column=j, padx=10, pady=2, sticky="nsew")
+            entry.insert(tk.END, value.strip())
+    
 
 root = tk.Tk()
 root.title("CPU Scheduling Simulator")
