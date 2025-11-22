@@ -90,7 +90,7 @@ def run_cpp_program():
         user_input = f"{num_tasks}\n" + "\n".join(tasks) + f"\n{quantum}\n"
         print(f"User input to C++ program:\n{user_input}")
 
-        result = subprocess.run(['acm.exe'], input=user_input, text=True, capture_output=True)
+        result = subprocess.run(['./acm.exe'], input=user_input, text=True, capture_output=True)
 
         if result.returncode == 0:
             print(f"Program output:\n{result.stdout}")
