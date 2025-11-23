@@ -1,285 +1,196 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <algorithm>
-#include <cmath>
-#include <utility>
-#include <iomanip>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 struct Task {
     int id;
-    double burst;
-    double arrival;
-    double priority;
-    double remaining;
+    long double bt, at, pr;
 };
 
-pair<double,double> fcfs(vector<Task> tasks) {
-    sort(tasks.begin(), tasks.end(), [](const Task& a, const Task& b) {
-        if (a.arrival == b.arrival) return a.id < b.id;
-        return a.arrival < b.arrival;
+pair<long double,long double> fcfs(vector<Task> v) {
+    int n = v.size();
+    sort(v.begin(), v.end(), [&](const Task &a, const Task &b){
+        if (a.at == b.at) return a.id < b.id;
+        return a.at < b.at;
     });
-    double currentTime = 0;
-    double totalTurnaroundTime = 0;
-    double totalWaitingTime = 0;
-    int n = tasks.size();
-    for (int i = 0; i < n; i++) {
-        if (currentTime < tasks[i].arrival) {
-            currentTime = tasks[i].arrival;
-        }
-        double startTime = currentTime;
-        double finishTime = startTime + tasks[i].burst;
-        totalTurnaroundTime += finishTime - tasks[i].arrival;
-        totalWaitingTime += startTime - tasks[i].arrival;
-        currentTime = finishTime;
+    long double t = 0, sumTat = 0, sumWt = 0;
+    for (auto &x : v) {
+        if (t < x.at) t = x.at;
+        t += x.bt;
+        long double tat = t - x.at;
+        sumTat += tat;
+        sumWt += tat - x.bt;
     }
-    return make_pair(totalTurnaroundTime / n, totalWaitingTime / n);
+    return {sumTat / n, sumWt / n};
 }
 
-struct CMP_SJF {
-    const vector<Task>* t;
-    CMP_SJF(const vector<Task>* x) : t(x) {}
-    bool operator()(int a, int b) const {
-        if (abs((*t)[a].remaining - (*t)[b].remaining) < 1e-9) {
-            return (*t)[a].id > (*t)[b].id;
-        }
-        return (*t)[a].remaining > (*t)[b].remaining;
-    }
-};
-
-pair<double,double> sjf_np(vector<Task> tasks) {
-    int n = tasks.size();
-    vector<int> ord(n);
-    for (int i = 0; i < n; i++) {
-        ord[i] = i;
-        tasks[i].remaining = tasks[i].burst;
-    }
-
-    sort(ord.begin(), ord.end(), [&](int a, int b) {
-        if (tasks[a].arrival == tasks[b].arrival) return tasks[a].id < tasks[b].id;
-        return tasks[a].arrival < tasks[b].arrival;
+pair<long double,long double> sjf(vector<Task> v) {
+    int n = v.size();
+    sort(v.begin(), v.end(), [&](const Task &a, const Task &b){
+        if (a.at == b.at) return a.id < b.id;
+        return a.at < b.at;
     });
-
-    priority_queue<int, vector<int>, CMP_SJF> pq((CMP_SJF(&tasks)));
-    int idx = 0;
-    double currentTime = 0;
-    double totalTurnaroundTime = 0;
-    double totalWaitingTime = 0;
-
-    while (idx < n || !pq.empty()) {
-        while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-            pq.push(ord[idx]);
-            idx++;
+    using Node = pair<long double,int>;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    int i = 0, done = 0;
+    long double t = 0, sumTat = 0, sumWt = 0;
+    while (done < n) {
+        while (i < n && v[i].at <= t) {
+            pq.push({v[i].bt, i});
+            i++;
         }
-
         if (pq.empty()) {
-            if (idx < n) {
-                currentTime = tasks[ord[idx]].arrival;
-                continue;
-            }
-        } else {
-            int id = pq.top(); pq.pop();
-            double startTime = currentTime;
-            double finishTime = startTime + tasks[id].remaining;
-            totalTurnaroundTime += finishTime - tasks[id].arrival;
-            totalWaitingTime += startTime - tasks[id].arrival;
-            currentTime = finishTime;
+            t = v[i].at;
+            continue;
         }
+        auto cur = pq.top(); pq.pop();
+        int idx = cur.second;
+        if (t < v[idx].at) t = v[idx].at;
+        t += v[idx].bt;
+        long double tat = t - v[idx].at;
+        sumTat += tat;
+        sumWt += tat - v[idx].bt;
+        done++;
     }
-    return make_pair(totalTurnaroundTime / n, totalWaitingTime / n);
+    return {sumTat / n, sumWt / n};
 }
 
-pair<double,double> rr(vector<Task> tasks, double q) {
-    int n = tasks.size();
-    vector<int> ord(n);
-    for (int i = 0; i < n; i++) ord[i] = i;
-
-    sort(ord.begin(), ord.end(), [&](int a, int b) {
-        if (tasks[a].arrival == tasks[b].arrival) return tasks[a].id < tasks[b].id;
-        return tasks[a].arrival < tasks[b].arrival;
+pair<long double,long double> rr(vector<Task> v, long double q) {
+    int n = v.size();
+    sort(v.begin(), v.end(), [&](const Task &a, const Task &b){
+        if (a.at == b.at) return a.id < b.id;
+        return a.at < b.at;
     });
+    vector<long double> rem(n);
+    for (int i = 0; i < n; i++) rem[i] = v[i].bt;
+    long double t = 0, sumTat = 0, sumWt = 0;
+    int done = 0, iNext = 0;
+    queue<int> ready;
 
-    for (int i = 0; i < n; i++) tasks[i].remaining = tasks[i].burst;
-
-    queue<int> qu;
-    int idx = 0;
-    double currentTime = 0;
-    double totalTurnaroundTime = 0;
-    double totalWaitingTime = 0;
-
-    while (idx < n || !qu.empty()) {
-        while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-            qu.push(ord[idx]);
-            idx++;
+    while (done < n) {
+        if (ready.empty()) {
+            if (iNext < n) {
+                if (t < v[iNext].at) t = v[iNext].at;
+                ready.push(iNext);
+                iNext++;
+            }
         }
-
-        if (qu.empty()) {
-            if (idx < n) {
-                currentTime = tasks[ord[idx]].arrival;
-                continue;
-            }
+        int idx = ready.front(); ready.pop();
+        long double runFor = min(q, rem[idx]);
+        t += runFor;
+        rem[idx] -= runFor;
+        if (rem[idx] > 0) {
+            ready.push(idx);
         } else {
-            int id = qu.front(); qu.pop();
-            double slice = min(tasks[id].remaining, q);
-            double startTime = currentTime;
-            currentTime += slice;
-            tasks[id].remaining -= slice;
-
-            while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-                qu.push(ord[idx]);
-                idx++;
-            }
-
-            if (tasks[id].remaining > 1e-9) {
-                qu.push(id);
-            } else {
-                totalTurnaroundTime += currentTime - tasks[id].arrival;
-                totalWaitingTime += (currentTime - tasks[id].arrival) - tasks[id].burst;
-            }
+            long double tat = t - v[idx].at;
+            sumTat += tat;
+            sumWt += tat - v[idx].bt;
+            done++;
+        }
+        while (iNext < n && v[iNext].at <= t) {
+            ready.push(iNext);
+            iNext++;
         }
     }
-    return make_pair(totalTurnaroundTime / n, totalWaitingTime / n);
+    return {sumTat / n, sumWt / n};
 }
 
-struct CMP_PRIORITY {
-    const vector<Task>* t;
-    CMP_PRIORITY(const vector<Task>* x) : t(x) {}
-    bool operator()(int a, int b) const {
-        if (abs((*t)[a].priority - (*t)[b].priority) < 1e-9) {
-            return (*t)[a].id > (*t)[b].id;
-        }
-        return (*t)[a].priority > (*t)[b].priority;
-    }
-};
-
-pair<double,double> priority_np(vector<Task> tasks) {
-    int n = tasks.size();
-    vector<int> ord(n);
-    for (int i = 0; i < n; i++) {
-        ord[i] = i;
-        tasks[i].remaining = tasks[i].burst;
-    }
-
-    sort(ord.begin(), ord.end(), [&](int a, int b) {
-        if (tasks[a].arrival == tasks[b].arrival) return tasks[a].id < tasks[b].id;
-        return tasks[a].arrival < tasks[b].arrival;
+pair<long double,long double> priority_np(vector<Task> v) {
+    int n = v.size();
+    sort(v.begin(), v.end(), [&](const Task &a, const Task &b){
+        if (a.at == b.at) return a.id < b.id;
+        return a.at < b.at;
     });
-
-    priority_queue<int, vector<int>, CMP_PRIORITY> pq((CMP_PRIORITY(&tasks)));
-    int idx = 0;
-    double currentTime = 0;
-    double totalTurnaroundTime = 0;
-    double totalWaitingTime = 0;
-
-    while (idx < n || !pq.empty()) {
-        while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-            pq.push(ord[idx]);
-            idx++;
+    using Node = pair<long double,int>;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    int i = 0, done = 0;
+    long double t = 0, sumTat = 0, sumWt = 0;
+    while (done < n) {
+        while (i < n && v[i].at <= t) {
+            pq.push({v[i].pr, i});
+            i++;
         }
-
         if (pq.empty()) {
-            if (idx < n) {
-                currentTime = tasks[ord[idx]].arrival;
-                continue;
-            }
-        } else {
-            int id = pq.top(); pq.pop();
-            double startTime = currentTime;
-            double finishTime = startTime + tasks[id].remaining;
-            totalTurnaroundTime += finishTime - tasks[id].arrival;
-            totalWaitingTime += startTime - tasks[id].arrival;
-            currentTime = finishTime;
+            t = v[i].at;
+            continue;
         }
+        auto cur = pq.top(); pq.pop();
+        int idx = cur.second;
+        if (t < v[idx].at) t = v[idx].at;
+        t += v[idx].bt;
+        long double tat = t - v[idx].at;
+        sumTat += tat;
+        sumWt += tat - v[idx].bt;
+        done++;
     }
-    return make_pair(totalTurnaroundTime / n, totalWaitingTime / n);
+    return {sumTat / n, sumWt / n};
 }
 
-pair<double,double> priority_p(vector<Task> tasks) {
-    int n = tasks.size();
-    vector<int> ord(n);
-    for (int i = 0; i < n; i++) {
-        ord[i] = i;
-        tasks[i].remaining = tasks[i].burst;
-    }
-
-    sort(ord.begin(), ord.end(), [&](int a, int b) {
-        if (tasks[a].arrival == tasks[b].arrival) return tasks[a].id < tasks[b].id;
-        return tasks[a].arrival < tasks[b].arrival;
+pair<long double,long double> priority_p(vector<Task> v) {
+    int n = v.size();
+    sort(v.begin(), v.end(), [&](const Task &a, const Task &b){
+        if (a.at == b.at) return a.id < b.id;
+        return a.at < b.at;
     });
+    vector<long double> rem(n);
+    for (int i = 0; i < n; i++) rem[i] = v[i].bt;
+    using Node = pair<long double,int>;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    int iNext = 0, done = 0;
+    long double t = 0, sumTat = 0, sumWt = 0;
+    const long double INF = numeric_limits<long double>::infinity();
 
-    priority_queue<int, vector<int>, CMP_PRIORITY> pq((CMP_PRIORITY(&tasks)));
-    int idx = 0;
-    double currentTime = 0;
-    double totalTurnaroundTime = 0;
-    double totalWaitingTime = 0;
-
-    while (idx < n || !pq.empty()) {
-        while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-            pq.push(ord[idx]);
-            idx++;
+    while (done < n) {
+        while (iNext < n && v[iNext].at <= t) {
+            pq.push({v[iNext].pr, iNext});
+            iNext++;
         }
-
         if (pq.empty()) {
-            if (idx < n) {
-                currentTime = tasks[ord[idx]].arrival;
-                continue;
-            }
+            t = v[iNext].at;
+            continue;
+        }
+        auto cur = pq.top(); pq.pop();
+        int idx = cur.second;
+        long double nextArrival = (iNext < n ? v[iNext].at : INF);
+        long double timeToFinish = rem[idx];
+        long double timeToNextArrival = nextArrival - t;
+        if (timeToFinish <= timeToNextArrival) {
+            t += timeToFinish;
+            rem[idx] = 0;
+            long double tat = t - v[idx].at;
+            sumTat += tat;
+            sumWt += tat - v[idx].bt;
+            done++;
         } else {
-            int id = pq.top(); pq.pop();
-
-            double execTime = tasks[id].remaining;
-            if (idx < n && tasks[ord[idx]].arrival < currentTime + execTime) {
-                execTime = tasks[ord[idx]].arrival - currentTime;
-            }
-
-            tasks[id].remaining -= execTime;
-            currentTime += execTime;
-
-            while (idx < n && tasks[ord[idx]].arrival <= currentTime) {
-                pq.push(ord[idx]);
-                idx++;
-            }
-
-            if (tasks[id].remaining > 1e-9) {
-                pq.push(id);
-            } else {
-                totalTurnaroundTime += currentTime - tasks[id].arrival;
-                totalWaitingTime += (currentTime - tasks[id].arrival) - tasks[id].burst;
-            }
+            t += timeToNextArrival;
+            rem[idx] -= timeToNextArrival;
+            pq.push({v[idx].pr, idx});
         }
     }
-    return make_pair(totalTurnaroundTime / n, totalWaitingTime / n);
+    return {sumTat / n, sumWt / n};
 }
 
 int main() {
     int n;
-    if (!(cin >> n)) return 0;
-    vector<Task> tasks(n);
-
+    cin >> n;
+    vector<Task> v(n);
     for (int i = 0; i < n; i++) {
-        if (!(cin >> tasks[i].burst >> tasks[i].arrival >> tasks[i].priority)) return 0;
-        tasks[i].id = i + 1;
-        tasks[i].remaining = tasks[i].burst;
+        cin >> v[i].bt >> v[i].at >> v[i].pr;
+        v[i].id = i;
     }
+    long double quantum;
+    cin >> quantum;
 
-    double quantum;
-    if (!(cin >> quantum)) return 0;
+    auto f = fcfs(v);
+    auto s = sjf(v);
+    auto r = rr(v, quantum);
+    auto pn = priority_np(v);
+    auto pp = priority_p(v);
 
-    pair<double,double> f = fcfs(tasks);
-    pair<double,double> s = sjf_np(tasks);
-    pair<double,double> r = rr(tasks, quantum);
-    pair<double,double> pn = priority_np(tasks);
-    pair<double,double> pp = priority_p(tasks);
-
-    cout << fixed << setprecision(1);
-    cout << "Algorithm|Avg Turnaround Time|Avg Waiting Time" << endl;
-    cout << "FCFS|" << f.first << "|" << f.second << endl;
-    cout << "SJF|" << s.first << "|" << s.second << endl;
-    cout << "Round Robin (Q=" << quantum << ")|" << r.first << "|" << r.second << endl;
-    cout << "Priority (Non-preemptive)|" << pn.first << "|" << pn.second << endl;
-    cout << "Priority (Preemptive)|" << pp.first << "|" << pp.second << endl;
-
-    return 0;
+    cout << fixed << setprecision(4);
+    cout << "Algorithm|Avg Turnaround Time|Avg Waiting Time\n";
+    cout << "FCFS|" << f.first << "|" << f.second << "\n";
+    cout << "SJF|" << s.first << "|" << s.second << "\n";
+    cout << "Round Robin (Q=" << quantum << ")|" << r.first << "|" << r.second << "\n";
+    cout << "Priority (Non-preemptive)|" << pn.first << "|" << pn.second << "\n";
+    cout << "Priority (Preemptive)|" << pp.first << "|" << pp.second << "\n";
 }

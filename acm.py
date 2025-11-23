@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, Canvas, Frame
 import subprocess
+import os
 
 def on_canvas_configure(event):
     canvas.configure(scrollregion=canvas.bbox("all"))
@@ -22,6 +23,8 @@ def create_task_input_fields():
         tk.Label(scrollable_frame, text="Arrival Time", font=("Helvetica", 10)).grid(row=1, column=2, padx=10, pady=5)
         tk.Label(scrollable_frame, text="Priority", font=("Helvetica", 10)).grid(row=1, column=3, padx=10, pady=5)
 
+        for widget in scrollable_frame.winfo_children():
+            widget.destroy()
         global entry_burst_times, entry_arrival_times, entry_priorities
         entry_burst_times = []
         entry_arrival_times = []
@@ -90,7 +93,8 @@ def run_cpp_program():
         user_input = f"{num_tasks}\n" + "\n".join(tasks) + f"\n{quantum}\n"
         print(f"User input to C++ program:\n{user_input}")
 
-        result = subprocess.run(['./acm.exe'], input=user_input, text=True, capture_output=True)
+        result = subprocess.run([os.path.abspath("acm.exe")],
+                        input=user_input, text=True, capture_output=True)
 
         if result.returncode == 0:
             print(f"Program output:\n{result.stdout}")
